@@ -6,42 +6,125 @@
 
 <h3>Ranking</h3>
 
-@if (_gameResults == null)
-{
-    <p><em>Loading...</em></p>
-}
-else
-{
-    <table class="table">
-        <thead>
-            <tr>
-                <th>UserName</th>
-                <th>Score</th>
-                <th>Date</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var gameResult in _gameResults)
-            {
-                <tr>
-                    <td>@gameResult.UserName</td>
-                    <td>@gameResult.Score</td>
-                    <td>@gameResult.Data.ToString()</td>
-                </tr>
-            }
-        </tbody>
-    </table>
-}
+<AuthorizeView>
+    <!-- 認証されたユーザー -->
+    <Authorized>
+        @if (_gameResults == null)
+        {
+            <p><em>Loading...</em></p>
+        }
+        else
+        {
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>UserName</th>
+                        <th>Score</th>
+                        <th>Date</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var gameResult in _gameResults)
+                    {
+                        <tr>
+                            <td>@gameResult.UserName</td>
+                            <td>@gameResult.Score</td>
+                            <td>@gameResult.Data.ToString()</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
 
-<div></div>
+            <p>
+                <!-- Result追加ボタン -->
+                <button class="btn btn-primary" @onclick="AddGameResult">Add</button>
+            </p>
+
+            <!-- ADD ポップアップ -->
+            @if (this._showPopup)
+            {
+                <div class="modal" style="display:block" role="dialog">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h3 class="modal-title">Add/Update GameResult</h3>
+                                <!-- ClosePopupボタン -->
+                                <button type="button" class="close" @onclick="ClosePopup">
+                                    <span aria-hidden="true">X</span>
+                                </button>
+                            </div>
+                            <div class="modal-body">
+                                <!-- UserName入力 -->
+                                <label for="UserName">UserName</label>
+                                <input class="form-control" type="text" placeholder="UserName" @bind-value="_gameResult.UserName" />
+                                <!-- Score入力 -->
+                                <label for="Score">Score</label>
+                                <input class="form-control" type="text" placeholder="Score" @bind-value="_gameResult.Score" />
+                                <br />
+                                <!-- Saveボタン -->
+                                <button class="btn btn-primary" @onclick="SaveGameResult">Save</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+
+        }
+    </Authorized>
+
+    <!-- 認証されていないユーザー -->
+    <NotAuthorized>
+        <p>認証を受けていないユーザーです。</p>
+    </NotAuthorized>
+</AuthorizeView>
 
 @code {
 
     List<GameResult> _gameResults;
+
+    bool _showPopup;
+    GameResult _gameResult;
 
     protected override async Task OnInitializedAsync()
     {
         _gameResults = await RankingService.GetGameResultsAsync();
     }
 
+    /// <summary>
+    /// Addボタンクリック時、Result追加ポップアップ作成
+    /// </summary>
+    void AddGameResult()
+    {
+        this._showPopup = true;
+        this._gameResult = new GameResult() { Id = 0 };
+    }
+
+    /// <summary>
+    /// ポップアップを閉じる
+    /// </summary>
+    void ClosePopup()
+    {
+        this._showPopup = false;
+    }
+
+    /// <summary>
+    /// Saveボタンクリック時
+    /// </summary>
+    async Task SaveGameResult()
+    {
+        if (this._gameResult.Id == 0)
+        {
+            this._gameResult.Data = DateTime.Now;
+            var result = RankingService.AddGameResult(_gameResult);
+        }
+        else
+        {
+            // TODO 変更
+        }
+
+        // データ更新
+        this._gameResults = await RankingService.GetGameResultsAsync();
+
+        this.ClosePopup();
+    }
 }

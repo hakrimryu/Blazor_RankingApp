@@ -18,6 +18,21 @@ namespace RankingApp.Data.Services
             this._context = context;
         }
 
+        // Create
+        /// <summary>
+        /// Result 追加
+        /// </summary>
+        public Task<GameResult> AddGameResult(GameResult gameResult)
+        {
+            // DB 追加
+            this._context.GameResults.Add(gameResult);
+            // DB 保存
+            this._context.SaveChanges();
+
+            return Task.FromResult(gameResult);
+        }
+
+        // Read
         /// <summary>
         /// GameResult DB (sort Score)
         /// </summary>
@@ -30,5 +45,9 @@ namespace RankingApp.Data.Services
 
             return Task.FromResult(results);
         }
+
+        // Update
+
+        // Delete
     }
 }
