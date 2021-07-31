@@ -40,7 +40,6 @@ namespace RankingApp
             services.AddRazorPages();
             services.AddServerSideBlazor();
             services.AddScoped<AuthenticationStateProvider, RevalidatingIdentityAuthenticationStateProvider<IdentityUser>>();
-            services.AddSingleton<WeatherForecastService>();
             // Ranking Service 運営開始
             services.AddScoped<RankingService>();
         }
