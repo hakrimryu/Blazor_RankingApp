@@ -21,16 +21,25 @@
                         <th>UserName</th>
                         <th>Score</th>
                         <th>Date</th>
+                        <th></th>
+                        <th></th>
                     </tr>
                 </thead>
                 <tbody>
                     @foreach (var gameResult in _gameResults)
                     {
-                        <tr>
-                            <td>@gameResult.UserName</td>
-                            <td>@gameResult.Score</td>
-                            <td>@gameResult.Data.ToString()</td>
-                        </tr>
+                    <tr>
+                        <td>@gameResult.UserName</td>
+                        <td>@gameResult.Score</td>
+                        <td>@gameResult.Data.ToString()</td>
+                        <td>
+                            <button class="btn btn-primary" @onclick="() => UpdateGameResult(gameResult)">Edite</button>
+                        </td>
+                        <td>
+                            <button class="btn btn-primary" @onclick="() => DeleteGameResult(gameResult)">Delete</button>
+                        </td>
+
+                    </tr>
                     }
                 </tbody>
             </table>
@@ -108,6 +117,26 @@
     }
 
     /// <summary>
+    /// Editeボタンクリック時、Result情報変更ポップアップ
+    /// </summary>
+    void UpdateGameResult(GameResult gameResult)
+    {
+        this._showPopup = true;
+        this._gameResult = gameResult;
+    }
+
+    /// <summary>
+    /// Deleteボタンクリック時、Result情報削除
+    /// </summary>
+    async Task DeleteGameResult(GameResult gameResult)
+    {
+        var result = RankingService.DeletGameResult(this._gameResult);
+        // データ更新
+        this._gameResults = await RankingService.GetGameResultsAsync();
+    }
+
+
+    /// <summary>
     /// Saveボタンクリック時
     /// </summary>
     async Task SaveGameResult()
@@ -119,7 +148,7 @@
         }
         else
         {
-            // TODO 変更
+            var result = RankingService.UpdateGameResult(this._gameResult);
         }
 
         // データ更新

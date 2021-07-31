@@ -24,9 +24,9 @@ namespace RankingApp.Data.Services
         /// </summary>
         public Task<GameResult> AddGameResult(GameResult gameResult)
         {
-            // DB 追加
+            // DBに、追加
             this._context.GameResults.Add(gameResult);
-            // DB 保存
+            // DBに、保存
             this._context.SaveChanges();
 
             return Task.FromResult(gameResult);
@@ -47,7 +47,51 @@ namespace RankingApp.Data.Services
         }
 
         // Update
+        /// <summary>
+        /// Result 変更
+        /// </summary>
+        public Task<bool> UpdateGameResult(GameResult gameResult)
+        {
+            // ID Check
+            var findResult = this._context.GameResults
+                .Where(x => x.Id == gameResult.Id)
+                .FirstOrDefault();
+
+            // IDがない場合、false返却
+            if (findResult == null)
+                return Task.FromResult(false);
+
+            // データ変更
+            findResult.UserName = gameResult.UserName;
+            findResult.Score = gameResult.Score;
+
+            // DBに、保存
+            this._context.SaveChanges();
+            // true返却
+            return Task.FromResult(true);
+        }
 
         // Delete
+        /// <summary>
+        /// Result 削除
+        /// </summary>
+        public Task<bool> DeletGameResult(GameResult gameResult)
+        {
+            // ID Check
+            var findResult = this._context.GameResults
+                .Where(x => x.Id == gameResult.Id)
+                .FirstOrDefault();
+
+            // IDがない場合、false返却
+            if (findResult == null)
+                return Task.FromResult(false);
+
+            this._context.GameResults.Remove(gameResult);
+            // DBに、保存
+            this._context.SaveChanges();
+            // true返却
+            return Task.FromResult(true);
+
+        }
     }
 }
