@@ -4,7 +4,7 @@ using System.Text;
 
 namespace SharedData.Models
 {
-    class GameResult
+    public class GameResult
     {
         /// <summary>
         /// DB ID
