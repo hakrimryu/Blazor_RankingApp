@@ -21,6 +21,14 @@ namespace WebApi.Controllers
         }
 
         // Create
+        [HttpPost]
+        public GameResult AddGameResult([FromBody]GameResult gameResult)
+        {
+            this._context.GameResults.Add(gameResult);
+            _context.SaveChanges();
+
+            return gameResult;
+        }
 
         // Read
         [HttpGet]
@@ -43,10 +51,42 @@ namespace WebApi.Controllers
             return result;
         }
 
-
-
         // Update
+        [HttpPut]
+        public bool UpdateGameResult([FromBody] GameResult gameResult)
+        {
+            var findResult = this._context.GameResults
+                .Where(x => x.Id == gameResult.Id)
+                .FirstOrDefault();
+
+            if (findResult == null)
+                return false;
+
+            findResult.UserName = gameResult.UserName;
+            findResult.Score = gameResult.Score;
+
+            this._context.SaveChanges();
+
+            return true;
+        }
+
 
         // Delete
+        [HttpDelete("{id}")]
+        public bool DeleteGameResult(int id)
+        {
+            var findResult = this._context.GameResults
+                .Where(x => x.Id == id)
+                .FirstOrDefault();
+
+            if (findResult == null)
+                return false;
+
+            this._context.GameResults.Remove(findResult);
+            this._context.SaveChanges();
+
+            return true;
+        }
+
     }
 }
