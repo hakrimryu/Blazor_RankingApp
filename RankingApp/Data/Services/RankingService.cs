@@ -1,97 +1,101 @@
-﻿using RankingApp.Data.Models;
+﻿using Newtonsoft.Json;
+using SharedData.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.Http;
+using System.Text;
 using System.Threading.Tasks;
 
 namespace RankingApp.Data.Services
 {
+    // [c <=> s] <-> [s] - DB
+
     public class RankingService
     {
-        /// <summary>
-        /// DB Data
-        /// </summary>
-        ApplicationDbContext _context;
+        HttpClient _httpClient;
 
-        public RankingService(ApplicationDbContext context)
+        public RankingService(HttpClient client)
         {
-            this._context = context;
+            this._httpClient = client;
         }
 
         // Create
         /// <summary>
         /// Result 追加
         /// </summary>
-        public Task<GameResult> AddGameResult(GameResult gameResult)
+        public async Task<GameResult> AddGameResult(GameResult gameResult)
         {
-            // DBに、追加
-            this._context.GameResults.Add(gameResult);
-            // DBに、保存
-            this._context.SaveChanges();
+            // GameResultをJsonに変更
+            string jsonStr = JsonConvert.SerializeObject(gameResult);
+            var content = new StringContent(jsonStr, Encoding.UTF8, "application/json");
+            // Postしてresult取得
+            var result = await _httpClient.PostAsync("api/ranking", content);
 
-            return Task.FromResult(gameResult);
+            // result取得の失敗
+            if (result.IsSuccessStatusCode == false)
+                throw new Exception("Add GameResult Failed");
+
+            // 成功時取得
+            var resultContent = await result.Content.ReadAsStringAsync();
+            // 取得したstring Game Resultでパッシング
+            GameResult resGameResult = JsonConvert.DeserializeObject<GameResult>(resultContent);
+            return resGameResult;
         }
 
         // Read
         /// <summary>
         /// GameResult DB (sort Score)
         /// </summary>
-        public Task<List<GameResult>> GetGameResultsAsync()
+        public async Task<List<GameResult>> GetGameResultsAsync()
         {
-            // GameResult DBで、全データスコア順に取得
-            List<GameResult> results = this._context.GameResults
-                .OrderByDescending(item => item.Score)
-                .ToList();
+            // Getしてresult取得
+            var result = await _httpClient.GetAsync("api/ranking");
 
-            return Task.FromResult(results);
+            // result取得の失敗
+            if (result.IsSuccessStatusCode == false)
+                throw new Exception("Get GameResult Failed");
+
+            // 成功時取得
+            var resultContent = await result.Content.ReadAsStringAsync();
+            // 取得したstring Game Resultでパッシング
+            List<GameResult> resGameResults = JsonConvert.DeserializeObject<List<GameResult>>(resultContent);
+            return resGameResults;
         }
 
         // Update
         /// <summary>
         /// Result 変更
         /// </summary>
-        public Task<bool> UpdateGameResult(GameResult gameResult)
+        public async Task<bool> UpdateGameResult(GameResult gameResult)
         {
-            // ID Check
-            var findResult = this._context.GameResults
-                .Where(x => x.Id == gameResult.Id)
-                .FirstOrDefault();
+            // GameResultをJsonに変更
+            string jsonStr = JsonConvert.SerializeObject(gameResult);
+            var content = new StringContent(jsonStr, Encoding.UTF8, "application/json");
+            // Putしてresult取得
+            var result = await _httpClient.PutAsync("api/ranking", content);
 
-            // IDがない場合、false返却
-            if (findResult == null)
-                return Task.FromResult(false);
+            // result取得の失敗
+            if (result.IsSuccessStatusCode == false)
+                throw new Exception("Update GameResult Failed");
 
-            // データ変更
-            findResult.UserName = gameResult.UserName;
-            findResult.Score = gameResult.Score;
-
-            // DBに、保存
-            this._context.SaveChanges();
-            // true返却
-            return Task.FromResult(true);
+            return true;
         }
-
+        
         // Delete
         /// <summary>
         /// Result 削除
         /// </summary>
-        public Task<bool> DeletGameResult(GameResult gameResult)
+        public async Task<bool> DeletGameResult(GameResult gameResult)
         {
-            // ID Check
-            var findResult = this._context.GameResults
-                .Where(x => x.Id == gameResult.Id)
-                .FirstOrDefault();
+            // IDを使って、 Deleteしてresult取得
+            var result = await _httpClient.DeleteAsync($"api/ranking/{gameResult.Id}");
 
-            // IDがない場合、false返却
-            if (findResult == null)
-                return Task.FromResult(false);
+            // result取得の失敗
+            if (result.IsSuccessStatusCode == false)
+                throw new Exception("Delet GameResult Failed");
 
-            this._context.GameResults.Remove(gameResult);
-            // DBに、保存
-            this._context.SaveChanges();
-            // true返却
-            return Task.FromResult(true);
-
+            return true;
         }
     }
 }
