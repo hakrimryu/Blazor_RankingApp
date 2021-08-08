@@ -40,8 +40,12 @@ namespace RankingApp
             services.AddRazorPages();
             services.AddServerSideBlazor();
             services.AddScoped<AuthenticationStateProvider, RevalidatingIdentityAuthenticationStateProvider<IdentityUser>>();
-            // Ranking Service 運営開始
-            services.AddScoped<RankingService>();
+
+            // WebApiと通信サービス開始
+            services.AddHttpClient<RankingService>(c =>
+            {
+                c.BaseAddress = new Uri("https://localhost:44354");
+            });
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

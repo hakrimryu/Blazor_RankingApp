@@ -1,5 +1,5 @@
 ﻿@page "/ranking"
-@using RankingApp.Data.Models;
+@using SharedData.Models;
 @using RankingApp.Data.Services;
 
 @inject RankingService RankingService
@@ -28,18 +28,18 @@
                 <tbody>
                     @foreach (var gameResult in _gameResults)
                     {
-                    <tr>
-                        <td>@gameResult.UserName</td>
-                        <td>@gameResult.Score</td>
-                        <td>@gameResult.Data.ToString()</td>
-                        <td>
-                            <button class="btn btn-primary" @onclick="() => UpdateGameResult(gameResult)">Edite</button>
-                        </td>
-                        <td>
-                            <button class="btn btn-primary" @onclick="() => DeleteGameResult(gameResult)">Delete</button>
-                        </td>
+                        <tr>
+                            <td>@gameResult.UserName</td>
+                            <td>@gameResult.Score</td>
+                            <td>@gameResult.Data.ToString()</td>
+                            <td>
+                                <button class="btn btn-primary" @onclick="() => UpdateGameResult(gameResult)">Edite</button>
+                            </td>
+                            <td>
+                                <button class="btn btn-primary" @onclick="() => DeleteGameResult(gameResult)">Delete</button>
+                            </td>
 
-                    </tr>
+                        </tr>
                     }
                 </tbody>
             </table>
@@ -144,11 +144,11 @@
         if (this._gameResult.Id == 0)
         {
             this._gameResult.Data = DateTime.Now;
-            var result = RankingService.AddGameResult(_gameResult);
+            var result = await RankingService.AddGameResult(_gameResult);
         }
         else
         {
-            var result = RankingService.UpdateGameResult(this._gameResult);
+            var result = await RankingService.UpdateGameResult(this._gameResult);
         }
 
         // データ更新
