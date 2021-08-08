@@ -3,7 +3,7 @@ Blazor学習後、実習のためのプロジェクト
 - DB連動
 - CRUD
 
-# [Run] WebApi
+# [Done] WebApi
 - DB連動
 - CRUD
 - Blazor RankingAppとの連動
